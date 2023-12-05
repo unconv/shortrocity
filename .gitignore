@@ -1,0 +1,6 @@
+__pycache__/
+old/
+shorts/
+*.txt
+!response.txt
+!requirements.txt
