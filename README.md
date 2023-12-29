@@ -1,23 +1,10 @@
-# Shortrocity
+# short-videos
+generate short videos using unstructured , langchain , cv2 , elevenlabs , OpenAi 
+# what is the difference ?
+    1.this app is using langchain 
+    2. using Ai models to extract the narration and imgaes descriptions instead of heurstics 
+    3. some tests for matching lengths 
+    4. using langsmith for montoring 
+    5. the app accepts a url for any html page instead of a manual way to copy text 
+    5. [future] deploy as a restapi using langserve 
 
-Shortrocity is a tool for making AI generated short videos ("shorts" or "reels") with a ChatGPT generated script, narrated by ElevenLabs or OpenAI text-to-speech. DALL-E 3 generated background images are also added to the background.
-
-## Quick Start
-
-First, add your API-keys to the environment:
-
-```console
-$ export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-$ export ELEVENLABS_API_KEY=YOUR_ELEVENLABS_API_KEY
-```
-
-Then, put your source content in a file, for example `source.txt` and run the `main.py`:
-
-```console
-$ ./main.py source.txt
-Generating script...
-Generating narration...
-Generating images...
-Generating video...
-DONE! Here's your video: shorts/1701788183/short.avi
-``````
