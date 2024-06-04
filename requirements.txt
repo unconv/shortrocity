@@ -1,4 +1,3 @@
-openai-whisper
 opencv-python
 elevenlabs
 captacity

@@ -2,13 +2,10 @@ from pydub import AudioSegment
 import subprocess
 import numpy as np
 import captacity
-import whisper
 import json
 import math
 import cv2
 import os
-
-model = whisper.load_model("base")
 
 def get_audio_duration(audio_file):
     return len(AudioSegment.from_file(audio_file))
@@ -140,14 +137,17 @@ def create_segments(narrations, output_dir):
     for i, narration in enumerate(narrations):
         audio_file = os.path.join(output_dir, "narrations", f"narration_{i+1}.mp3")
 
-        transcription = model.transcribe(
-            audio=audio_file,
-            word_timestamps=True,
-            fp16=False,
-            initial_prompt=narration,
-        )
+        try:
+            t_segments = captacity.transcriber.transcribe_locally(
+                audio_file=audio_file,
+                prompt=narration,
+            )
+        except ImportError:
+            t_segments = captacity.transcriber.transcribe_with_api(
+                audio_file=audio_file,
+                prompt=narration,
+            )
 
-        t_segments = transcription["segments"]
         o_segments = offset_segments(t_segments, offset)
 
         segments += o_segments

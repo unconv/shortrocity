@@ -1,6 +1,6 @@
 # Shortrocity
 
-Shortrocity is a tool for making AI generated short videos ("shorts" or "reels") with a ChatGPT generated script, narrated by ElevenLabs or OpenAI text-to-speech. DALL-E 3 generated background images are also added to the background. Captions with word highlighting are generated with [Captacity](https://github.com/unconv/captacity), which uses [OpenAI Whisper](https://github.com/openai/whisper) locally.
+Shortrocity is a tool for making AI generated short videos ("shorts" or "reels") with a ChatGPT generated script, narrated by ElevenLabs or OpenAI text-to-speech. DALL-E 3 generated background images are also added to the background. Captions with word highlighting are generated with [Captacity](https://github.com/unconv/captacity), which uses [OpenAI Whisper](https://github.com/openai/whisper).
 
 ## Quick Start
 
