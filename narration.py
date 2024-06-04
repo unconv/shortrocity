@@ -1,11 +1,11 @@
-from elevenlabs import generate, set_api_key, save, RateLimitError
+from elevenlabs.client import ElevenLabs
+from elevenlabs import save
 import openai
 import os
 
-elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
-
-if elevenlabs_key:
-    set_api_key(elevenlabs_key)
+elevenlabs = ElevenLabs(
+    api_key=os.getenv("ELEVEN_API_KEY")
+)
 
 narration_api = "elevenlabs" # (or "openai")
 
@@ -50,7 +50,7 @@ def create(data, output_folder):
 
             audio.stream_to_file(output_file)
         else:
-            audio = generate(
+            audio = elevenlabs.generate(
                 text=element["content"],
                 voice="Michael",
                 model="eleven_monolingual_v1"

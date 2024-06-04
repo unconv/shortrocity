@@ -8,7 +8,7 @@ First, add your API-keys to the environment:
 
 ```console
 $ export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-$ export ELEVENLABS_API_KEY=YOUR_ELEVENLABS_API_KEY
+$ export ELEVEN_API_KEY=YOUR_ELEVENLABS_API_KEY
 ```
 
 Then, put your source content in a file, for example `source.txt` and run the `main.py`:
