@@ -1,13 +1,44 @@
 from pydub import AudioSegment
+import subprocess
 import numpy as np
+import captacity
+import whisper
+import json
 import math
 import cv2
 import os
 
-import text
+model = whisper.load_model("base")
 
 def get_audio_duration(audio_file):
     return len(AudioSegment.from_file(audio_file))
+
+def add_narration_to_video(narrations, input_video, output_dir, output_file):
+    full_narration = AudioSegment.empty()
+
+    for i, _ in enumerate(narrations):
+        audio = os.path.join(output_dir, "narrations", f"narration_{i+1}.mp3")
+        full_narration += AudioSegment.from_file(audio)
+
+    temp_narration = os.path.join(output_dir, "narration.mp3")
+    full_narration.export(temp_narration, format="mp3")
+
+    ffmpeg_command = [
+        'ffmpeg',
+        '-y',
+        '-i', input_video,
+        '-i', temp_narration,
+        '-map', '0:v',   # Map video from the first input
+        '-map', '1:a',   # Map audio from the second input
+        '-c:v', 'copy',  # Copy video codec
+        '-c:a', 'aac',   # AAC audio codec
+        '-strict', 'experimental',
+        os.path.join(output_dir, output_file)
+    ]
+
+    subprocess.run(ffmpeg_command, capture_output=True)
+
+    os.remove(temp_narration)
 
 def resize_image(image, width, height):
     # Calculate the aspect ratio of the original image
@@ -24,7 +55,10 @@ def resize_image(image, width, height):
     # Resize the image to the new dimensions without distorting it
     return cv2.resize(image, (new_width, new_height))
 
-def create(narrations, output_dir, output_filename):
+def create(narrations, output_dir, output_filename, caption_settings: dict|None = None):
+    if caption_settings is None:
+        caption_settings = {}
+
     # Define the dimensions and frame rate of the video
     width, height = 1080, 1920  # Change as needed for your vertical video
     frame_rate = 30  # Adjust as needed
@@ -78,6 +112,54 @@ def create(narrations, output_dir, output_filename):
     out.release()
     cv2.destroyAllWindows()
 
-    text.add_narration_to_video(narrations, temp_video, output_dir, output_filename)
+    # Add narration audio to video
+    with_narration = "with_narration.mp4"
+    add_narration_to_video(narrations, temp_video, output_dir, with_narration)
 
+    # Add captions to video
+    output_path = os.path.join(output_dir, output_filename)
+    input_path = os.path.join(output_dir, with_narration)
+    segments = create_segments(narrations, output_dir)
+
+    captacity.add_captions(
+        video_file=input_path,
+        output_file=output_path,
+        segments=segments,
+        print_info=True,
+        **caption_settings,
+    )
+
+    # Clean up temporary files
+    os.remove(input_path)
     os.remove(temp_video)
+
+def create_segments(narrations, output_dir):
+    segments = []
+
+    offset = 0
+    for i, narration in enumerate(narrations):
+        audio_file = os.path.join(output_dir, "narrations", f"narration_{i+1}.mp3")
+
+        transcription = model.transcribe(
+            audio=audio_file,
+            word_timestamps=True,
+            fp16=False,
+            initial_prompt=narration,
+        )
+
+        t_segments = transcription["segments"]
+        o_segments = offset_segments(t_segments, offset)
+
+        segments += o_segments
+        offset += get_audio_duration(audio_file) / 1000
+
+    return segments
+
+def offset_segments(segments: list[dict], offset: float):
+    for segment in segments:
+        segment["start"] += offset
+        segment["end"] += offset
+        for word in segment["words"]:
+            word["start"] += offset
+            word["end"] += offset
+    return segments

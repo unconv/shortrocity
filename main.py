@@ -13,11 +13,16 @@ import video
 client = OpenAI()
 
 if len(sys.argv) < 2:
-    print(f"USAGE: {sys.argv[0]} SOURCE_FILENAME")
+    print(f"Usage: {sys.argv[0]} <source_file> [settings_file]")
     sys.exit(1)
 
 with open(sys.argv[1]) as f:
     source_material = f.read()
+
+caption_settings = {}
+if len(sys.argv) > 2:
+    with open(sys.argv[2]) as f:
+        caption_settings = json.load(f)
 
 short_id = str(int(time.time()))
 output_file = "short.avi"
@@ -88,6 +93,6 @@ print("Generating images...")
 images.create_from_data(data, os.path.join(basedir, "images"))
 
 print("Generating video...")
-video.create(narrations, basedir, output_file)
+video.create(narrations, basedir, output_file, caption_settings)
 
 print(f"DONE! Here's your video: {os.path.join(basedir, output_file)}")
